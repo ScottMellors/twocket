@@ -1,0 +1,18 @@
+{
+  "name": "twocket",
+  "version": "1.0.0",
+  "description": "A handy wrapper for the Twitch EventSub Websocket API.",
+  "main": "Twocket.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "GhostlyTuna <me@ghostlytuna.co.uk>",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.0",
+    "ws": "^8.11.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.3"
+  }
+}
