@@ -60,12 +60,6 @@ class Twocket {
 
                 case "notification":
                     //This needs to be more generic to allow for other event types not specified
-
-                    //set["channel.follow"] => ()
-
-
-                    //setter(subType, () => {});
-
                     let subType = parsedData.metadata["subscription_type"];
 
                     if(subType in this.activeListeners) {
