@@ -1,4 +1,4 @@
-import { CheerPayloadEvent, FollowPayloadEvent, RaidPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent } from './WebSocketPayloadEvent';
+import { BasicWebsocketPayloadEvent, CheerPayloadEvent, FollowPayloadEvent, RaidPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent } from './WebSocketPayloadEvent';
 declare class Twocket {
     private TWITCH_USER_ID;
     private TWITCH_CLIENT_ID;
@@ -40,6 +40,6 @@ declare class Twocket {
      * @param eventType - EventSub Subscription type
      * @param newHandler - event handler to trigger when given event is received on the socket.
      */
-    setEventSubHandler(eventType: string, newHandler: (eventData: any) => void): void;
+    setEventSubHandler<T extends BasicWebsocketPayloadEvent>(eventType: string, newHandler: (eventData: T) => void): void;
 }
 export { SubscriptionGiftPayloadEvent, CheerPayloadEvent, RaidPayloadEvent, SubscriptionPayloadEvent, RewardRedemptionPayloadReward, RewardRedemptionPayloadEvent, FollowPayloadEvent, Twocket };

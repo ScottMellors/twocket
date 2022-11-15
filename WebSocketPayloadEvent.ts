@@ -1,4 +1,6 @@
-interface WebsocketPayloadEvent {
+interface BasicWebsocketPayloadEvent {}
+
+interface WebsocketPayloadEvent extends BasicWebsocketPayloadEvent {
     user_id: string;
     user_login: string;
     user_name: string;
@@ -30,14 +32,7 @@ interface SubscriptionGiftPayloadEvent extends WebsocketPayloadEvent {
     is_anonymous: boolean;
 }
 
-interface RewardRedemptionPayloadReward {
-    id: string;
-    title: string;
-    cost: number;
-    prompt: string;
-}
-
-interface RaidPayloadEvent {
+interface RaidPayloadEvent extends BasicWebsocketPayloadEvent {
     viewers: number;
     from_broadcaster_user_id: string,
     from_broadcaster_user_login: string,
@@ -53,6 +48,13 @@ interface CheerPayloadEvent extends WebsocketPayloadEvent {
     is_anonymous: boolean; //Is this necessary now that it's deprecated?
 }
 
+interface RewardRedemptionPayloadReward {
+    id: string;
+    title: string;
+    cost: number;
+    prompt: string;
+}
+
 export {
     CheerPayloadEvent,
     RaidPayloadEvent,
@@ -61,5 +63,6 @@ export {
     FollowPayloadEvent,
     RewardRedemptionPayloadEvent,
     RewardRedemptionPayloadReward,
-    WebsocketPayloadEvent
+    WebsocketPayloadEvent,
+    BasicWebsocketPayloadEvent
 }

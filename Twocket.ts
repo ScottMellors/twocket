@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { RawData, WebSocket } from 'ws';
-import { CheerPayloadEvent, FollowPayloadEvent, RaidPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent } from './WebSocketPayloadEvent';
+import { BasicWebsocketPayloadEvent, CheerPayloadEvent, FollowPayloadEvent, RaidPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent, WebsocketPayloadEvent } from './WebSocketPayloadEvent';
 
 class Twocket {
     private TWITCH_USER_ID: string;
@@ -63,9 +63,9 @@ class Twocket {
                     let subType = parsedData.metadata["subscription_type"];
 
                     if(subType in this.activeListeners) {
-                        console.log("found " + subType);
+                        this.activeListeners[subType](parsedData.payload.event);
                     } else {
-                        console.log("not found " + subType);
+                        console.log("Handler Subscription type not found - " + subType);
                     }
 
                     break;
@@ -173,7 +173,7 @@ class Twocket {
      * @param eventType - EventSub Subscription type
      * @param newHandler - event handler to trigger when given event is received on the socket.
      */
-    setEventSubHandler(eventType: string, newHandler: (eventData: any) => void) {
+    setEventSubHandler<T extends BasicWebsocketPayloadEvent>(eventType: string, newHandler: (eventData: T) => void) {
         this.activeListeners[eventType] = newHandler;
     }
 }

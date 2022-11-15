@@ -1,4 +1,6 @@
-interface WebsocketPayloadEvent {
+interface BasicWebsocketPayloadEvent {
+}
+interface WebsocketPayloadEvent extends BasicWebsocketPayloadEvent {
     user_id: string;
     user_login: string;
     user_name: string;
@@ -25,13 +27,7 @@ interface SubscriptionGiftPayloadEvent extends WebsocketPayloadEvent {
     cumulative_total: number | undefined;
     is_anonymous: boolean;
 }
-interface RewardRedemptionPayloadReward {
-    id: string;
-    title: string;
-    cost: number;
-    prompt: string;
-}
-interface RaidPayloadEvent {
+interface RaidPayloadEvent extends BasicWebsocketPayloadEvent {
     viewers: number;
     from_broadcaster_user_id: string;
     from_broadcaster_user_login: string;
@@ -45,4 +41,10 @@ interface CheerPayloadEvent extends WebsocketPayloadEvent {
     message: string;
     is_anonymous: boolean;
 }
-export { CheerPayloadEvent, RaidPayloadEvent, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent, FollowPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, WebsocketPayloadEvent };
+interface RewardRedemptionPayloadReward {
+    id: string;
+    title: string;
+    cost: number;
+    prompt: string;
+}
+export { CheerPayloadEvent, RaidPayloadEvent, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent, FollowPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, WebsocketPayloadEvent, BasicWebsocketPayloadEvent };
