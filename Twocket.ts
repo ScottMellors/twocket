@@ -83,7 +83,9 @@ class Twocket {
         this.ws?.close();
     }
 
-    //TODO Work out why this isnt doing anything
+    /**
+     * Outputs a list of active subscriptions to track which are currently marked as "Active" 
+     */
     getCurrentSubscriptions() {
         const options = {
             method: 'GET',
@@ -93,13 +95,16 @@ class Twocket {
             }
         };
 
-        fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options).then(response => {
+        fetch('https://api.twitch.tv/helix/eventsub/subscriptions?status=enabled', options).then(response => {
             if (!response.ok) {
                 throw new Error("Error retrieving subscriptions - " + response.status);
             } else {
-                console.log("Got subs");
                 response.json().then(response => {
-                    console.log(response);
+                    console.log(response.data.length + " active subscriptions found.");
+
+                    for(let i = 0; i < response.data.length; i++) {
+                        console.log(response.data[i].type + " subscription is active");
+                    }
                 });
             }
         });
@@ -114,9 +119,16 @@ class Twocket {
         //TODO Potential validation on the subscrtiptionType to ensure the user is requesting a 
         //valid (or already requested sub type).
 
+        let body = `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
+
+        if(subscriptionType == "channel.raid") {
+            //NOTE This is hardcoded to only create subscriptions for raids coming to the channel
+            body = `{"type":"${subscriptionType}","version":"1","condition":{"to_broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
+        } 
+
         const options = {
             method: 'POST',
-            body: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            body: body,
             headers: {
                 Authorization: `Bearer ${this.TWITCH_ACCESS_TOKEN}`,
                 'Client-Id': this.TWITCH_CLIENT_ID,
