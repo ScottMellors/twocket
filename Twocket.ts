@@ -1,60 +1,6 @@
 import fetch from 'node-fetch';
 import { RawData, WebSocket } from 'ws';
-
-interface WebsocketPayloadEvent {
-    user_id: string;
-    user_login: string;
-    user_name: string;
-    broadcaster_user_id: string;
-    broadcaster_user_login: string;
-    broadcaster_user_name: string;
-}
-
-interface FollowPayloadEvent extends WebsocketPayloadEvent {
-    followed_at: string; //could be date?
-}
-
-interface RewardRedemptionPayloadEvent extends WebsocketPayloadEvent {
-    user_input: string;
-    status: string;
-    reward: RewardRedemptionPayloadReward;
-    redeemed_at: string; //Could be date?
-}
-
-interface SubscriptionPayloadEvent extends WebsocketPayloadEvent {
-    tier: string;
-    is_gift: boolean;
-}
-
-interface SubscriptionGiftPayloadEvent extends WebsocketPayloadEvent {
-    total: number;
-    tier: string;
-    cumulative_total: number | undefined;
-    is_anonymous: boolean;
-}
-
-interface RewardRedemptionPayloadReward {
-    id: string;
-    title: string;
-    cost: number;
-    prompt: string;
-}
-
-interface RaidPayloadEvent {
-    viewers: number;
-    from_broadcaster_user_id: string,
-    from_broadcaster_user_login: string,
-    from_broadcaster_user_name: string,
-    to_broadcaster_user_id: string,
-    to_broadcaster_user_login: string,
-    to_broadcaster_user_name: string,
-}
-
-interface CheerPayloadEvent extends WebsocketPayloadEvent {
-    bits: number;
-    message: string;
-    is_anonymous: boolean; //Is this necessary now that it's deprecated?
-}
+import { CheerPayloadEvent, FollowPayloadEvent, RaidPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent } from './WebSocketPayloadEvent';
 
 class Twocket {
     private TWITCH_USER_ID: string;
@@ -64,38 +10,15 @@ class Twocket {
     private TWITCH_SOCKET_ID: string | undefined;
     private scopes: string[] | [];
 
-    private VALID_SCOPES = ["channel.channel_points_custom_reward_redemption.add", "channel.raid","channel.cheer","channel.follow", "channel.subscribe", "channel.subscription.gift" ];
+    private activeListeners: {[key: string]: (eventData: any) => void};
 
-    private onFollowEvent = (eventData: FollowPayloadEvent) => {
-        console.log("On Follow Event Receieved");
-    };
-
-    private onRaidEvent = (eventData: RaidPayloadEvent) => {
-        console.log("On Raid Event Receieved");
-    };
-
-    private onSubscriptionGiftEvent = (eventData: SubscriptionGiftPayloadEvent) => {
-        console.log("On Subscribe Gift Event Received");
-    };
-
-    private onChannelPointRewardRedeem = (eventData: RewardRedemptionPayloadEvent) => {
-        console.log("On Channel Point Reward Redeem Event Received");
-    }
-
-    private onSubscribeEvent = (eventData: SubscriptionPayloadEvent) => {
-        console.log("On Subscribe Event Received");
-    };
-
-    private onCheerEvent = (eventData: CheerPayloadEvent) => {
-        console.log("On Cheer Event Received");
-    };
-    
     constructor(twitchUserId: string, twitchClientId: string, twitchAccessToken: string, scopesToRegister: string[]) {
         this.TWITCH_USER_ID = twitchUserId;
         this.TWITCH_CLIENT_ID = twitchClientId;
         this.TWITCH_ACCESS_TOKEN = twitchAccessToken;
         this.scopes = scopesToRegister;
-    }   
+        this.activeListeners = {};
+    }
 
     protected setTwitchSocketId(socketId: string) {
         this.TWITCH_SOCKET_ID = socketId;
@@ -103,7 +26,7 @@ class Twocket {
 
     private registerScopes() {
         //Register Events for given scopes
-        if(this.scopes.length < 1) {
+        if (this.scopes.length < 1) {
             this.ws?.close();
             throw new Error('Scopes cannot be 0, ensure you are adding this to the constructor!');
         } else {
@@ -118,60 +41,46 @@ class Twocket {
         //Do websocket things
         this.ws = new WebSocket("wss://eventsub-beta.wss.twitch.tv/ws");
 
-        this.ws.on('message', (data: RawData) => {       
+        this.ws.on('message', (data: RawData) => {
             let parsedData = JSON.parse(data.toString());
 
             switch (parsedData.metadata["message_type"]) {
-                case ("session_welcome"):
+                case "session_welcome":
                     this.setTwitchSocketId(parsedData.payload.session.id);
 
                     this.registerScopes();
-                break;
+                    break;
 
-                case ("session_reconnect"):
+                case "session_reconnect":
                     //Do reconnect things
                     console.log("Reconnecting");
 
                     this.registerScopes();
-                break;
+                    break;
 
-                case ("notification"):
+                case "notification":
+                    //This needs to be more generic to allow for other event types not specified
 
-                    if(this.VALID_SCOPES.includes(parsedData.metadata["subscription_type"])) {
-                        switch(parsedData.metadata["subscription_type"]) {
-                            case "channel.follow":
-                                this.onFollowEvent(parsedData.payload.event);
-                            break;
+                    //set["channel.follow"] => ()
 
-                            case "channel.subscription.gift":
-                                this.onSubscriptionGiftEvent(parsedData.payload.event);
-                            break;
 
-                            case "channel.raid":
-                                this.onRaidEvent(parsedData.payload.event);
-                            break;
+                    //setter(subType, () => {});
 
-                            case "channel.cheer":
-                                this.onCheerEvent(parsedData.payload.event);
-                            break;
-    
-                            case "channel.subscribe":
-                                this.onSubscribeEvent(parsedData.payload.event);
-                            break;
+                    let subType = parsedData.metadata["subscription_type"];
 
-                            case "channel.channel_points_custom_reward_redemption.add":
-                                this.onChannelPointRewardRedeem(parsedData.payload.event);
-                            break;
-    
-                            default:
-                                console.log(parsedData.metadata["subscription_type"] + " event handler missing!");
-                            break;
-                        }
+                    if(subType in this.activeListeners) {
+                        console.log("found " + subType);
                     } else {
-                        //Error - not valid scope found
-                        throw new Error('Incorrect Scope Found!');
-                    } 
-                break;
+                        console.log("not found " + subType);
+                    }
+
+                    break;
+
+                case "revocation":
+                    let revokedSubscription = parsedData.payload.subscription;
+                    //TODO Optional Logging here
+                    console.log(revokedSubscription.type + " subscription revoked. Reason - " + revokedSubscription.status);
+                    break;
             }
         });
     }
@@ -180,54 +89,98 @@ class Twocket {
         this.ws?.close();
     }
 
-    getSubscriptionList() {
-        //TODO
+    //TODO Work out why this isnt doing anything
+    getCurrentSubscriptions() {
+        const options = {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${this.TWITCH_ACCESS_TOKEN}`,
+                'Client-Id': this.TWITCH_CLIENT_ID
+            }
+        };
+
+        fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options).then(response => {
+            if (!response.ok) {
+                throw new Error("Error retrieving subscriptions - " + response.status);
+            } else {
+                console.log("Got subs");
+                response.json().then(response => {
+                    console.log(response);
+                });
+            }
+        });
     }
 
-    private async sendSubscriptionRequestToTwitch(requestType: String) {
+    /**
+     * 
+     * @param subscriptionType - the type of event you want to subscribe to listen for e.g. "channel.follow"
+     * More info found at - https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription
+     */
+    private async sendSubscriptionRequestToTwitch(subscriptionType: String) {
+        //TODO Potential validation on the subscrtiptionType to ensure the user is requesting a 
+        //valid (or already requested sub type).
+
         const options = {
             method: 'POST',
-            body: `{"type":"${requestType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}` ,
+            body: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
             headers: {
                 Authorization: `Bearer ${this.TWITCH_ACCESS_TOKEN}`,
                 'Client-Id': this.TWITCH_CLIENT_ID,
-                'Content-Type':'application/json' 
+                'Content-Type': 'application/json'
             }
         };
-        
-        let response = await fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options);   
 
-        if(!response.ok) {
-           throw new Error("Error creating subscription - " + response.status);
+        let response = await fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options);
+
+        if (!response.ok) {
+            throw new Error("Error creating subscription - " + response.status);
         } else {
             //TODO Maybe do verbose logging of creating connections?
-            console.log(requestType + " subscription created");
+            console.log(subscriptionType + " subscription created");
         }
     }
 
-    //Handler handlers.
+    /** Handler handlers.
+    * 
+    *   A suite of handlers for dealing with the various subscription types. 
+    *   They are simple setters but each of them have their own related parameters 
+    *   e.g. RewardRedemptionPayloadEvent
+    * 
+    *   These are convenience methods, for the most common use cases, if you require other eventsub events,
+    *   check out the generic setEventSubHandler().
+    */
     setOnChannelPointRewardRedeem(newHandler: (eventData: RewardRedemptionPayloadEvent) => void) {
-        this.onChannelPointRewardRedeem = newHandler;
+        this.setEventSubHandler("channel.channel_points_custom_reward_redemption.add", newHandler);
     }
 
     setOnFollowEvent(newHandler: (eventData: FollowPayloadEvent) => void) {
-        this.onFollowEvent = newHandler;
+        this.setEventSubHandler("channel.follow", newHandler);
     }
 
     setOnSubscribeEvent(newHandler: (eventData: SubscriptionPayloadEvent) => void) {
-        this.onSubscribeEvent = newHandler;
+        this.setEventSubHandler("channel.subscribe", newHandler);
     }
 
     setOnRaidEvent(newHandler: (eventData: RaidPayloadEvent) => void) {
-        this.onRaidEvent = newHandler;
+        this.setEventSubHandler("channel.raid", newHandler);
     }
 
     setOnCheerEvent(newHandler: (eventData: CheerPayloadEvent) => void) {
-        this.onCheerEvent = newHandler;
+        this.setEventSubHandler("channel.cheer", newHandler);
     }
 
     setOnGiftSubscribeEvent(newHandler: (eventData: SubscriptionGiftPayloadEvent) => void) {
-        this.onSubscriptionGiftEvent = newHandler;
+        this.setEventSubHandler("channel.subscription.gift", newHandler);
+    }
+
+    /**
+     * A generic method of supplying an event handler to a given subscription type event
+     * 
+     * @param eventType - EventSub Subscription type
+     * @param newHandler - event handler to trigger when given event is received on the socket.
+     */
+    setEventSubHandler(eventType: string, newHandler: (eventData: any) => void) {
+        this.activeListeners[eventType] = newHandler;
     }
 }
 

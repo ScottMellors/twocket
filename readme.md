@@ -12,7 +12,7 @@ Learn more [here](https://dev.twitch.tv/docs/eventsub/handling-websocket-events)
 
 ## Prerequisites 
 
-This class just handles the connectivity, you will need to supply: the Twitch user ID, Twitch app client ID &the authorised user access token for that client.
+This class just handles the connectivity, you will need to supply: the Twitch user ID, Twitch app client ID & the authorised user access token for that client.
 
 More info [here](https://dev.twitch.tv/).
 
