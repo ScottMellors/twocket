@@ -6,11 +6,11 @@ class Twocket {
     private TWITCH_USER_ID: string;
     private TWITCH_CLIENT_ID: string;
     private TWITCH_ACCESS_TOKEN: string;
-    private ws: WebSocket | undefined;
-    private TWITCH_SOCKET_ID: string | undefined;
+    private ws!: WebSocket;
+    private TWITCH_SOCKET_ID!: string;
     private scopes: string[] | [];
 
-    private activeListeners: {[key: string]: (eventData: any) => void};
+    private activeListeners: { [key: string]: (eventData: any) => void };
 
     constructor(twitchUserId: string, twitchClientId: string, twitchAccessToken: string, scopesToRegister: string[]) {
         this.TWITCH_USER_ID = twitchUserId;
@@ -20,7 +20,7 @@ class Twocket {
         this.activeListeners = {};
     }
 
-    protected setTwitchSocketId(socketId: string) {
+    private setTwitchSocketId(socketId: string) {
         this.TWITCH_SOCKET_ID = socketId;
     }
 
@@ -62,7 +62,7 @@ class Twocket {
                     //This needs to be more generic to allow for other event types not specified
                     let subType = parsedData.metadata["subscription_type"];
 
-                    if(subType in this.activeListeners) {
+                    if (subType in this.activeListeners) {
                         this.activeListeners[subType](parsedData.payload.event);
                     } else {
                         console.log("Handler Subscription type not found - " + subType);
@@ -102,7 +102,7 @@ class Twocket {
                 response.json().then(response => {
                     console.log(response.data.length + " active subscriptions found.");
 
-                    for(let i = 0; i < response.data.length; i++) {
+                    for (let i = 0; i < response.data.length; i++) {
                         console.log(response.data[i].type + " subscription is active");
                     }
                 });
@@ -115,16 +115,16 @@ class Twocket {
      * @param subscriptionType - the type of event you want to subscribe to listen for e.g. "channel.follow"
      * More info found at - https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription
      */
-    private async sendSubscriptionRequestToTwitch(subscriptionType: String) {
+    private sendSubscriptionRequestToTwitch(subscriptionType: string) {
         //TODO Potential validation on the subscrtiptionType to ensure the user is requesting a 
         //valid (or already requested sub type).
 
         let body = `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
 
-        if(subscriptionType == "channel.raid") {
+        if (subscriptionType == "channel.raid") {
             //NOTE This is hardcoded to only create subscriptions for raids coming to the channel
             body = `{"type":"${subscriptionType}","version":"1","condition":{"to_broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
-        } 
+        }
 
         const options = {
             method: 'POST',
@@ -136,14 +136,14 @@ class Twocket {
             }
         };
 
-        let response = await fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options);
-
-        if (!response.ok) {
-            throw new Error("Error creating subscription - " + response.status);
-        } else {
-            //TODO Maybe do verbose logging of creating connections?
-            console.log(subscriptionType + " subscription created");
-        }
+        fetch('https://api.twitch.tv/helix/eventsub/subscriptions', options).then(response => {
+            if (!response.ok) {
+                throw new Error("Error creating subscription - " + response.status);
+            } else {
+                //TODO Maybe do verbose logging of creating connections?
+                console.log(subscriptionType + " subscription created");
+            }
+        });
     }
 
     /** Handler handlers.

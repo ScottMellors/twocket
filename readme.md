@@ -35,12 +35,15 @@ Copy the Twocket.ts into your project. (Like a goblin)
  - Add listeners for which events you want to listen for (each event has their own returned data type for convenience that match the api [here](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types).)
  - start it up with start()
 
+## Event Listeners
+
+Setting up an event listener has two options, for the most common use cases I've included wrapped examples such as ```setOnFollowEvent()``` & ```setOnChannelPointRewardRedeem```. If you want to listen to any of the other scoped events, you can use ```setEventSubHandler("EVENTSUB.SCOPE", (eventDataType) => {})```.
+
 ## TODO 
 
  - make logging an option as part of the twocket.
- - extract the interfaces to their own file.
- - implement the missing features from API for completionist sake.
- - None node / standalone version?
+ - nodeless / standalone version?
+ - add missing Event Payload interfaces
 
 ## Contact
 
