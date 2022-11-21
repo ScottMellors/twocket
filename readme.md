@@ -26,10 +26,6 @@ More info [here](https://dev.twitch.tv/).
 
 Add this repo as a dependancy in Node.
 
--- **or** -- 
-
-Copy the Twocket.ts into your project. (Like a goblin)
-
 ## Get Started
  - Create an instance of a Twocket using the contructor
  - Add listeners for which events you want to listen for (each event has their own returned data type for convenience that match the api [here](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types).)
@@ -38,12 +34,6 @@ Copy the Twocket.ts into your project. (Like a goblin)
 ## Event Listeners
 
 Setting up an event listener has two options, for the most common use cases I've included wrapped examples such as ```setOnFollowEvent()``` & ```setOnChannelPointRewardRedeem```. If you want to listen to any of the other scoped events, you can use ```setEventSubHandler("EVENTSUB.SCOPE", (eventDataType) => {})```.
-
-## TODO 
-
- - make logging an option as part of the twocket.
- - nodeless / standalone version?
- - add missing Event Payload interfaces
 
 ## Contact
 
