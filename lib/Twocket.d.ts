@@ -4,13 +4,18 @@ declare class Twocket {
     private TWITCH_CLIENT_ID;
     private TWITCH_ACCESS_TOKEN;
     private ws;
-    private reconnectSocket;
     private TWITCH_SOCKET_ID;
     private scopes;
     private activeListeners;
     constructor(twitchUserId: string, twitchClientId: string, twitchAccessToken: string, scopesToRegister: string[]);
     private setTwitchSocketId;
     private registerScopes;
+    /**
+     * Handles the management of Websocket connection, websocket reconnect requests and
+     * event handling.
+     * @param wsUrl - Websocket URL to connect to
+     * @param isReconnect - Determines if this is a reconnect URL
+     */
     private connect;
     start(): void;
     stop(): void;

@@ -29,7 +29,7 @@ Add this repo as a dependancy in Node.
 ## Get Started
  - Create an instance of a Twocket using the contructor
  - Add listeners for which events you want to listen for (each event has their own returned data type for convenience that match the api [here](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types).)
- - start it up with start()
+ - start it up with ```start()```
 
 ## Event Listeners
 

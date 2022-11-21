@@ -7,7 +7,6 @@ class Twocket {
     private TWITCH_CLIENT_ID: string;
     private TWITCH_ACCESS_TOKEN: string;
     private ws!: WebSocket;
-    private reconnectSocket!: WebSocket;
     private TWITCH_SOCKET_ID!: string;
     private scopes: string[] | [];
 
@@ -38,6 +37,12 @@ class Twocket {
         }
     }
 
+    /**
+     * Handles the management of Websocket connection, websocket reconnect requests and 
+     * event handling.
+     * @param wsUrl - Websocket URL to connect to
+     * @param isReconnect - Determines if this is a reconnect URL
+     */
     private connect(wsUrl: string, isReconnect = false) {
         let newWs = new WebSocket(wsUrl);
 
@@ -50,6 +55,7 @@ class Twocket {
                     
                     if(isReconnect == false) {
                         this.registerScopes();
+                        this.ws = newWs;
                     } else {
                         this.ws.close();
                         this.ws = newWs;
