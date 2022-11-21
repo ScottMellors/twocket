@@ -4,14 +4,19 @@ declare class Twocket {
     private TWITCH_CLIENT_ID;
     private TWITCH_ACCESS_TOKEN;
     private ws;
+    private reconnectSocket;
     private TWITCH_SOCKET_ID;
     private scopes;
     private activeListeners;
     constructor(twitchUserId: string, twitchClientId: string, twitchAccessToken: string, scopesToRegister: string[]);
-    protected setTwitchSocketId(socketId: string): void;
+    private setTwitchSocketId;
     private registerScopes;
+    private connect;
     start(): void;
     stop(): void;
+    /**
+     * Outputs a list of active subscriptions to track which are currently marked as "Active"
+     */
     getCurrentSubscriptions(): void;
     /**
      *

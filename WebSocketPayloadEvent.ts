@@ -13,6 +13,13 @@ interface FollowPayloadEvent extends WebsocketPayloadEvent {
     followed_at: string; //could be date?
 }
 
+interface RewardRedemptionPayloadReward {
+    id: string;
+    title: string;
+    cost: number;
+    prompt: string;
+}
+
 interface RewardRedemptionPayloadEvent extends WebsocketPayloadEvent {
     user_input: string;
     status: string;
@@ -46,13 +53,6 @@ interface CheerPayloadEvent extends WebsocketPayloadEvent {
     bits: number;
     message: string;
     is_anonymous: boolean; //Is this necessary now that it's deprecated?
-}
-
-interface RewardRedemptionPayloadReward {
-    id: string;
-    title: string;
-    cost: number;
-    prompt: string;
 }
 
 export {

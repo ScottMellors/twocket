@@ -11,6 +11,12 @@ interface WebsocketPayloadEvent extends BasicWebsocketPayloadEvent {
 interface FollowPayloadEvent extends WebsocketPayloadEvent {
     followed_at: string;
 }
+interface RewardRedemptionPayloadReward {
+    id: string;
+    title: string;
+    cost: number;
+    prompt: string;
+}
 interface RewardRedemptionPayloadEvent extends WebsocketPayloadEvent {
     user_input: string;
     status: string;
@@ -40,11 +46,5 @@ interface CheerPayloadEvent extends WebsocketPayloadEvent {
     bits: number;
     message: string;
     is_anonymous: boolean;
-}
-interface RewardRedemptionPayloadReward {
-    id: string;
-    title: string;
-    cost: number;
-    prompt: string;
 }
 export { CheerPayloadEvent, RaidPayloadEvent, SubscriptionGiftPayloadEvent, SubscriptionPayloadEvent, FollowPayloadEvent, RewardRedemptionPayloadEvent, RewardRedemptionPayloadReward, WebsocketPayloadEvent, BasicWebsocketPayloadEvent };

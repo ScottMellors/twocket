@@ -7,6 +7,7 @@ class Twocket {
     private TWITCH_CLIENT_ID: string;
     private TWITCH_ACCESS_TOKEN: string;
     private ws!: WebSocket;
+    private reconnectSocket!: WebSocket;
     private TWITCH_SOCKET_ID!: string;
     private scopes: string[] | [];
 
@@ -37,25 +38,31 @@ class Twocket {
         }
     }
 
-    start() {
-        //Do websocket things
-        this.ws = new WebSocket("wss://eventsub-beta.wss.twitch.tv/ws");
+    private connect(wsUrl: string, isReconnect = false) {
+        let newWs = new WebSocket(wsUrl);
 
-        this.ws.on('message', (data: RawData) => {
+        newWs.on('message', (data: RawData) => {
             let parsedData = JSON.parse(data.toString());
 
             switch (parsedData.metadata["message_type"]) {
                 case "session_welcome":
                     this.setTwitchSocketId(parsedData.payload.session.id);
+                    
+                    if(isReconnect == false) {
+                        this.registerScopes();
+                    } else {
+                        this.ws.close();
+                        this.ws = newWs;
+                    }    
 
-                    this.registerScopes();
                     break;
 
                 case "session_reconnect":
                     //Do reconnect things
                     console.log("Reconnecting");
+                    let reconnectUrl = parsedData.payload.session.reconnect_url;
+                    this.connect(reconnectUrl, true);
 
-                    this.registerScopes();
                     break;
 
                 case "notification":
@@ -77,6 +84,11 @@ class Twocket {
                     break;
             }
         });
+    }
+
+    start() {
+        //Do websocket things
+        this.connect("wss://eventsub-beta.wss.twitch.tv/ws");
     }
 
     stop() {
