@@ -139,9 +139,17 @@ class Twocket {
 
         let body = `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
 
-        if (subscriptionType == "channel.raid") {
-            //NOTE This is hardcoded to only create subscriptions for raids coming to the channel
-            body = `{"type":"${subscriptionType}","version":"1","condition":{"to_broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`;
+        const specificBody = {
+            ["channel.raid"]: `{"type":"${subscriptionType}","version":"1","condition":{"to_broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            ["channel.follow"]: `{"type":"${subscriptionType}","version":"2","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}","moderator_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            ["channel.chat.message"]: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}","user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            ["channel.shoutout.create"]: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}","moderator_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            ["channel.shoutout.receive"]: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}","moderator_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`,
+            ["stream.offline"]: `{"type":"${subscriptionType}","version":"1","condition":{"broadcaster_user_id":"${this.TWITCH_USER_ID}"},"transport":{"method":"websocket","session_id":"${this.TWITCH_SOCKET_ID}"}}`
+        }
+
+        if (subscriptionType in specificBody) {
+            body = specificBody[subscriptionType];
         }
 
         const options = {
